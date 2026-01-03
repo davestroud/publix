@@ -1,0 +1,46 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "Building backend Docker image..."
+      - docker build -f infrastructure/Dockerfile.backend -t publix-backend .
+run:
+  runtime-version: latest
+  command: ./backend-start.sh
+  network:
+    port: 8000
+    env: PORT
+  env:
+    # Non-sensitive environment variables
+    - name: LANGSMITH_PROJECT
+      value: "publix-expansion-predictor"
+    - name: AWS_REGION
+      value: "us-east-1"
+    - name: S3_BUCKET_NAME
+      value: "publix-expansion-data"
+    - name: S3_REGION
+      value: "us-east-1"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: PYTHONUNBUFFERED
+      value: "1"
+    - name: PYTHONPATH
+      value: "/app/backend"
+    # CORS - Update with frontend App Runner URL after deployment
+    - name: ALLOWED_ORIGINS
+      value: "*" # Update with actual frontend URL: "https://your-frontend-url.run.app"
+    # Secrets (configure these in AWS App Runner console or via AWS CLI)
+    # These should be set as secrets, not plain values:
+    # - DATABASE_URL (from AWS Secrets Manager or Parameter Store)
+    # - OPENAI_API_KEY (from AWS Secrets Manager)
+    # - LANGSMITH_API_KEY (from AWS Secrets Manager)
+    # - GOOGLE_PLACES_API_KEY (from AWS Secrets Manager)
+    # - CENSUS_API_KEY (optional, from AWS Secrets Manager)
+    # - SMARTY_AUTH_ID (optional, from AWS Secrets Manager)
+    # - SMARTY_API_KEY (optional, from AWS Secrets Manager)
+    # - NEWS_API_KEY (optional, from AWS Secrets Manager)
+    # - BLS_API_KEY (optional, from AWS Secrets Manager)
+    # - FRED_API_KEY (optional, from AWS Secrets Manager)
+    # - AWS_ACCESS_KEY_ID (from AWS Secrets Manager or use IAM role)
+    # - AWS_SECRET_ACCESS_KEY (from AWS Secrets Manager or use IAM role)

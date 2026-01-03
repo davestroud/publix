@@ -1,0 +1,28 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "Building Docker image..."
+      - docker build -t publix-expansion-predictor -f infrastructure/Dockerfile .
+run:
+  runtime-version: latest
+  command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: DATABASE_URL
+      value: "postgresql://user:password@rds-endpoint:5432/publix_db"
+    - name: OPENAI_API_KEY
+      value: "from-secrets-manager"
+    - name: LANGSMITH_API_KEY
+      value: "from-secrets-manager"
+    - name: LANGSMITH_PROJECT
+      value: "publix-expansion-predictor"
+    - name: AWS_REGION
+      value: "us-east-1"
+    - name: S3_BUCKET_NAME
+      value: "publix-expansion-data"
+    - name: LOG_LEVEL
+      value: "INFO"

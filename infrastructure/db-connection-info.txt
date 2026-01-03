@@ -1,0 +1,48 @@
+==========================================
+Database Connection Information
+==========================================
+
+Database Created Successfully!
+
+Instance Identifier: publix-expansion-db
+Endpoint: publix-expansion-db.co1dd6f49wfo.us-east-1.rds.amazonaws.com
+Port: 5432
+Database Name: publix_db
+Username: publix_admin
+Password: Kk8pKDxT00jm+tMbusEXYG+oRqHZ2jZp
+
+==========================================
+Connection String (for .env file)
+==========================================
+
+IMPORTANT: The password contains '+' characters which need to be URL-encoded as '%2B'
+
+Use this DATABASE_URL in your backend/.env file:
+
+DATABASE_URL=postgresql://publix_admin:Kk8pKDxT00jm%2BtMbusEXYG%2BoRqHZ2jZp@publix-expansion-db.co1dd6f49wfo.us-east-1.rds.amazonaws.com:5432/publix_db
+
+Or if SQLAlchemy handles it automatically, you can try:
+DATABASE_URL=postgresql://publix_admin:Kk8pKDxT00jm+tMbusEXYG+oRqHZ2jZp@publix-expansion-db.co1dd6f49wfo.us-east-1.rds.amazonaws.com:5432/publix_db
+
+==========================================
+Next Steps
+==========================================
+
+1. Add DATABASE_URL to your backend/.env file (see above)
+
+2. Run database migrations:
+   cd backend
+   poetry run alembic upgrade head
+
+3. Test the connection:
+   poetry run python -c "from app.services.database import engine; print('Connected!' if engine.connect() else 'Failed')"
+
+4. Start the backend server:
+   poetry run uvicorn app.main:app --reload
+
+==========================================
+Security Note
+==========================================
+
+Save this password securely! Consider storing it in AWS Secrets Manager for production use.
+

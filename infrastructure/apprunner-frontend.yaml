@@ -1,0 +1,18 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "Building frontend Docker image..."
+      - docker build -f infrastructure/Dockerfile.frontend --build-arg VITE_API_URL=${VITE_API_URL} -t publix-frontend .
+run:
+  runtime-version: latest
+  command: nginx -g "daemon off;"
+  network:
+    port: 8080
+    env: PORT
+  env:
+    # Backend API URL - Update with backend App Runner service URL after backend deployment
+    - name: VITE_API_URL
+      value: "https://your-backend-service-url.run.app/api" # Update this after backend deployment
+

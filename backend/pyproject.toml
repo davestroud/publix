@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "publix-expansion-predictor"
+version = "0.1.0"
+description = "Multi-agent LLM system to predict Publix store expansion locations"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+sqlalchemy = "^2.0.23"
+alembic = "^1.12.1"
+psycopg2-binary = "^2.9.9"
+openai = "^1.12.0"
+langsmith = "^0.1.0"
+langchain = "^0.1.0"
+langchain-openai = "^0.0.5"
+beautifulsoup4 = "^4.12.2"
+scrapy = "^2.11.0"
+requests = "^2.31.0"
+boto3 = "^1.29.7"
+python-dotenv = "^1.0.0"
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+httpx = "^0.25.2"
+python-multipart = "^0.0.6"
+selenium = "^4.39.0"
+playwright = "^1.57.0"
+googlemaps = "^4.10.0"
+pdfplumber = "^0.11.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+black = "^23.11.0"
+ruff = "^0.1.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+

@@ -1,0 +1,61 @@
+==========================================
+S3 Bucket Information
+==========================================
+
+Bucket Created Successfully!
+
+Bucket Name: publix-expansion-data
+Region: us-east-1
+Versioning: Enabled
+Encryption: AES256 (Server-Side Encryption)
+Public Access: Blocked (Security Best Practice)
+
+==========================================
+Folder Structure
+==========================================
+
+The following folders have been created:
+  - data/          - General data storage
+  - reports/       - Generated analysis reports
+  - cache/         - Cached results and responses
+  - scraped-data/  - Web scraping results
+
+==========================================
+Configuration
+==========================================
+
+Add to your backend/.env file:
+S3_BUCKET_NAME=publix-expansion-data
+S3_REGION=us-east-1
+
+==========================================
+Usage Examples
+==========================================
+
+# List bucket contents
+aws s3 ls s3://publix-expansion-data/
+
+# Upload a file
+aws s3 cp local-file.json s3://publix-expansion-data/data/
+
+# Download a file
+aws s3 cp s3://publix-expansion-data/data/file.json ./local-file.json
+
+# Sync a directory
+aws s3 sync ./local-folder/ s3://publix-expansion-data/data/
+
+==========================================
+Security Notes
+==========================================
+
+- Public access is blocked for security
+- All objects are encrypted at rest (AES256)
+- Versioning is enabled for data protection
+- Access is controlled via IAM policies
+
+For production, consider:
+- Setting up lifecycle policies for old data
+- Configuring CloudTrail for audit logging
+- Setting up bucket notifications for events
+- Implementing cross-region replication for disaster recovery
+

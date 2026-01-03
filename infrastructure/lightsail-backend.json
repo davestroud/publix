@@ -1,0 +1,49 @@
+{
+  "serviceName": "publix-backend",
+  "power": "nano",
+  "scale": 1,
+  "publicEndpoint": {
+    "containerName": "backend",
+    "containerPort": 8000,
+    "healthCheck": {
+      "path": "/health",
+      "intervalSeconds": 30,
+      "timeoutSeconds": 5,
+      "healthyThreshold": 2,
+      "unhealthyThreshold": 2,
+      "successCodes": "200"
+    }
+  },
+  "deployment": {
+    "containers": {
+      "backend": {
+        "image": "022398263250.dkr.ecr.us-east-1.amazonaws.com/publix-backend:latest",
+        "environment": {
+          "LANGSMITH_PROJECT": "publix-expansion-predictor",
+          "AWS_REGION": "us-east-1",
+          "S3_BUCKET_NAME": "publix-expansion-data",
+          "S3_REGION": "us-east-1",
+          "LOG_LEVEL": "INFO",
+          "PYTHONUNBUFFERED": "1",
+          "PYTHONPATH": "/app/backend",
+          "ALLOWED_ORIGINS": "*"
+        },
+        "ports": {
+          "8000": "HTTP"
+        }
+      }
+    },
+    "publicEndpoint": {
+      "containerName": "backend",
+      "containerPort": 8000,
+      "healthCheck": {
+        "path": "/health",
+        "intervalSeconds": 30,
+        "timeoutSeconds": 5,
+        "healthyThreshold": 2,
+        "unhealthyThreshold": 2,
+        "successCodes": "200"
+      }
+    }
+  }
+}

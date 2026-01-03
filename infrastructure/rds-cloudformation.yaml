@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "RDS PostgreSQL database for Publix Expansion Predictor"
+
+Parameters:
+  DBInstanceIdentifier:
+    Type: String
+    Default: publix-expansion-db
+    Description: Database instance identifier
+
+  DBInstanceClass:
+    Type: String
+    Default: db.t3.micro
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
+      - db.t3.large
+    Description: Database instance class
+
+  EngineVersion:
+    Type: String
+    Default: "15.15"
+    Description: PostgreSQL engine version
+
+  MasterUsername:
+    Type: String
+    Default: publix_admin
+    NoEcho: false
+    Description: Master username for the database
+
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+    Description: Master password for the database
+    MinLength: 8
+
+  AllocatedStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+    MaxValue: 65536
+    Description: Initial allocated storage in GB
+
+  MaxAllocatedStorage:
+    Type: Number
+    Default: 100
+    MinValue: 20
+    MaxValue: 65536
+    Description: Maximum allocated storage for autoscaling in GB
+
+  PubliclyAccessible:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Make database publicly accessible
+
+  MultiAZ:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Enable Multi-AZ deployment
+
+Resources:
+  # VPC (using default VPC)
+  DefaultVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+    Condition: CreateVPC
+
+  # DB Subnet Group
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: publix-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for Publix Expansion Predictor database
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: publix-db-subnet-group
+        - Key: Project
+          Value: publix-expansion-predictor
+
+  # Subnets (if creating new VPC)
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVPC
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+    Condition: CreateVPC
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DefaultVPC
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+    Condition: CreateVPC
+
+  # Internet Gateway (if creating new VPC)
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Condition: CreateVPC
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref DefaultVPC
+    Condition: CreateVPC
+
+  # Security Group
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: publix-db-sg
+      GroupDescription: Security group for Publix Expansion Predictor RDS
+      VpcId: !Ref DefaultVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+          Description: PostgreSQL access
+      Tags:
+        - Key: Name
+          Value: publix-db-sg
+        - Key: Project
+          Value: publix-expansion-predictor
+
+  # Secrets Manager Secret for Password
+  DBPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: publix-db-password
+      Description: Password for Publix Expansion Predictor RDS database
+      SecretString: !Ref MasterUserPassword
+      Tags:
+        - Key: Name
+          Value: publix-db-password
+        - Key: Project
+          Value: publix-expansion-predictor
+
+  # RDS Database Instance
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Ref DBInstanceIdentifier
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: postgres
+      EngineVersion: !Ref EngineVersion
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      DBName: publix_db
+      AllocatedStorage: !Ref AllocatedStorage
+      MaxAllocatedStorage: !Ref MaxAllocatedStorage
+      StorageType: gp3
+      StorageEncrypted: true
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroup
+      BackupRetentionPeriod: 7
+      PreferredBackupWindow: "03:00-04:00"
+      PreferredMaintenanceWindow: "mon:04:00-mon:05:00"
+      PubliclyAccessible: !Ref PubliclyAccessible
+      MultiAZ: !Ref MultiAZ
+      EnableCloudwatchLogsExports:
+        - postgresql
+        - upgrade
+      Tags:
+        - Key: Name
+          Value: publix-expansion-db
+        - Key: Project
+          Value: publix-expansion-predictor
+
+Conditions:
+  CreateVPC: !Equals [!Ref "AWS::Region", "us-east-1"] # Adjust as needed
+
+Outputs:
+  DBEndpoint:
+    Description: RDS instance endpoint
+    Value: !GetAtt DBInstance.Endpoint.Address
+    Export:
+      Name: !Sub "${AWS::StackName}-DBEndpoint"
+
+  DBPort:
+    Description: RDS instance port
+    Value: !GetAtt DBInstance.Endpoint.Port
+    Export:
+      Name: !Sub "${AWS::StackName}-DBPort"
+
+  DBName:
+    Description: Database name
+    Value: !GetAtt DBInstance.DBName
+    Export:
+      Name: !Sub "${AWS::StackName}-DBName"
+
+  DBUsername:
+    Description: Database master username
+    Value: !Ref MasterUsername
+    Export:
+      Name: !Sub "${AWS::StackName}-DBUsername"
+
+  DBSecurityGroupId:
+    Description: Security group ID for the database
+    Value: !Ref DBSecurityGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-DBSecurityGroupId"
+
+  DBPasswordSecretArn:
+    Description: ARN of the secret storing the database password
+    Value: !Ref DBPasswordSecret
+    Export:
+      Name: !Sub "${AWS::StackName}-DBPasswordSecretArn"
+
+  ConnectionString:
+    Description: Database connection string template
+    Value: !Sub "postgresql://${MasterUsername}:[PASSWORD]@${DBInstance.Endpoint.Address}:${DBInstance.Endpoint.Port}/publix_db"

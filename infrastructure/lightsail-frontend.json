@@ -1,0 +1,42 @@
+{
+  "serviceName": "publix-frontend",
+  "power": "nano",
+  "scale": 1,
+  "publicEndpoint": {
+    "containerName": "frontend",
+    "containerPort": 8080,
+    "healthCheck": {
+      "path": "/health",
+      "intervalSeconds": 30,
+      "timeoutSeconds": 5,
+      "healthyThreshold": 2,
+      "unhealthyThreshold": 2,
+      "successCodes": "200"
+    }
+  },
+  "deployment": {
+    "containers": {
+      "frontend": {
+        "image": "022398263250.dkr.ecr.us-east-1.amazonaws.com/publix-frontend:latest",
+        "environment": {
+          "VITE_API_URL": "https://PLACEHOLDER/api"
+        },
+        "ports": {
+          "8080": "HTTP"
+        }
+      }
+    },
+    "publicEndpoint": {
+      "containerName": "frontend",
+      "containerPort": 8080,
+      "healthCheck": {
+        "path": "/health",
+        "intervalSeconds": 30,
+        "timeoutSeconds": 5,
+        "healthyThreshold": 2,
+        "unhealthyThreshold": 2,
+        "successCodes": "200"
+      }
+    }
+  }
+}
