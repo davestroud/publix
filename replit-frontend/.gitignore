@@ -1,0 +1,9 @@
+# Replit Frontend - Git Ignore
+# Add any files you don't want to commit
+
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+

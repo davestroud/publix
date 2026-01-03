@@ -1,0 +1,13 @@
+# Replit Backend - Git Ignore
+# Add any files you don't want to commit
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+*.log
+

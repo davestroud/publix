@@ -1,11 +1,11 @@
 /** API client for backend communication */
 import axios from 'axios'
 
-// Get API URL from environment variable (set at build time for App Runner)
-// Fallback to localhost for development
+// Get API URL from environment variable (set at build time for production)
+// Supports Replit, App Runner, or localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_URL ||
     import.meta.env.PROD ?
-    'https://your-backend-apprunner-url.run.app/api' :
+    'https://your-backend-repl-url.repl.co/api' :
     'http://localhost:8000/api'
 
 const apiClient = axios.create({

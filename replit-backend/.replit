@@ -1,0 +1,11 @@
+run = "python main.py"
+entrypoint = "main.py"
+interpreter = [["python3", "main.py"]]
+language = "python3"
+
+[languages.python3]
+pattern = "**/*.py"
+
+[deploy]
+run = ["sh", "-c", "python main.py"]
+

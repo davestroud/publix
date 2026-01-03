@@ -1,0 +1,10 @@
+run = "npm run dev"
+entrypoint = "index.html"
+language = "nodejs"
+
+[languages.nodejs]
+pattern = "**/*.{js,jsx,ts,tsx,json}"
+
+[deploy]
+run = ["sh", "-c", "npm run build && node serve.js"]
+
