@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [react()],
     server: {
-        port: 3000,
+        host: '0.0.0.0',
+        port: 5000,
+        allowedHosts: true,
         proxy: {
             '/api': {
                 target: 'http://localhost:8000',
@@ -25,7 +27,4 @@ export default defineConfig({
             }
         }
     },
-    // Vite automatically handles VITE_ prefixed environment variables
-    // No need for manual define - Vite will inject them at build time
 })
-

@@ -16,18 +16,33 @@ def traceable(name=None):
     return decorator
 
 
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 import json
 
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai_client = None
+llm = None
 
-# Initialize LangChain LLM with LangSmith
-llm = ChatOpenAI(
-    model_name="gpt-4-turbo-preview",
-    temperature=0.7,
-    openai_api_key=os.getenv("OPENAI_API_KEY"),
-)
+def _get_openai_client():
+    global openai_client
+    if openai_client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        openai_client = OpenAI(api_key=api_key)
+    return openai_client
+
+def _get_llm():
+    global llm
+    if llm is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        llm = ChatOpenAI(
+            model_name="gpt-4-turbo-preview",
+            temperature=0.7,
+            openai_api_key=api_key,
+        )
+    return llm
 
 
 @traceable(name="llm_call")
@@ -39,7 +54,8 @@ def call_llm(
 ) -> str:
     """Call OpenAI API with LangSmith tracing"""
     try:
-        response = openai_client.chat.completions.create(
+        client = _get_openai_client()
+        response = client.chat.completions.create(
             model=model,
             messages=messages,
             temperature=temperature,

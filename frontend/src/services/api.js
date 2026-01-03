@@ -1,12 +1,7 @@
 /** API client for backend communication */
 import axios from 'axios'
 
-// Get API URL from environment variable (set at build time for production)
-// Supports Replit, App Runner, or localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
-    import.meta.env.PROD ?
-    'https://your-backend-repl-url.repl.co/api' :
-    'http://localhost:8000/api'
+const API_BASE_URL = '/api'
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -15,7 +10,6 @@ const apiClient = axios.create({
     },
 })
 
-// Request interceptor
 apiClient.interceptors.request.use(
     (config) => {
         return config
@@ -25,7 +19,6 @@ apiClient.interceptors.request.use(
     }
 )
 
-// Response interceptor
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -35,37 +28,18 @@ apiClient.interceptors.response.use(
 )
 
 export const api = {
-    // Stores
     getStores: (params = {}) => apiClient.get('/stores', { params }),
-
-    // Predictions
     getPredictions: (params = {}) => apiClient.get('/predictions', { params }),
-
-    // Analysis
     triggerAnalysis: (data) => apiClient.post('/analyze', data),
     analyzeCity: (data) => apiClient.post('/analyze/city', data),
-
-    // Demographics
     getDemographics: (city, state) =>
         apiClient.get(`/demographics/${city}`, { params: { state } }),
-
-    // Zoning
     getZoningRecords: (region, params = {}) =>
         apiClient.get(`/zoning/${region}`, { params }),
-
-    // Dashboard
     getDashboardStats: () => apiClient.get('/dashboard/stats'),
-
-    // Competitors
     getCompetitors: (params = {}) => apiClient.get('/competitors', { params }),
-
-    // Demographics
     getDemographicsList: (params = {}) => apiClient.get('/demographics', { params }),
-
-    // Parcels
     getParcels: (params = {}) => apiClient.get('/parcels', { params }),
-
-    // Smarty API
     geocodeAddress: (address, city, state, zipCode) =>
         apiClient.post('/smarty/geocode', null, {
             params: { address, city, state, zip_code: zipCode },
@@ -78,8 +52,6 @@ export const api = {
         apiClient.post('/smarty/search-parcels', null, {
             params: { city, state, min_acreage: minAcreage, max_acreage: maxAcreage },
         }),
-
-    // Chat
     chat: (message, conversationHistory = null) =>
         apiClient.post('/chat', {
             message,
@@ -89,8 +61,6 @@ export const api = {
         apiClient.post('/chat/simple', null, {
             params: { message },
         }),
-
-    // Advanced Analytics
     getHeatmap: (state = null) =>
         apiClient.get('/analytics/heatmap', {
             params: state ? { state } : {},
@@ -117,8 +87,6 @@ export const api = {
         apiClient.get('/analytics/trends', {
             params: state ? { state, years } : { years },
         }),
-
-    // New Data Collection Endpoints
     getShoppingCenters: (params = {}) =>
         apiClient.get('/shopping-centers', { params }),
     getTrafficData: (params = {}) =>
@@ -132,4 +100,3 @@ export const api = {
 }
 
 export default apiClient
-
