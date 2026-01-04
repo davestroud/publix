@@ -2,11 +2,14 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.api import routes
 from app.api import analytics_routes
 from app.services.database import init_db
 import os
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -89,11 +92,22 @@ def root():
 @app.get("/health")
 def health_check():
     """Health check endpoint - must respond quickly for App Runner"""
-    # Always return healthy immediately - don't block on database
-    # App Runner needs fast response for health checks
-    # Return 200 status code explicitly
     from fastapi import Response
-
     return Response(
         content='{"status":"healthy"}', media_type="application/json", status_code=200
     )
+
+frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/assets", StaticFiles(directory=frontend_dist / "assets"), name="assets")
+    
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        """Serve frontend for all non-API routes"""
+        if full_path.startswith("api/"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not found")
+        file_path = frontend_dist / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(frontend_dist / "index.html")

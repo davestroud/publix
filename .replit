@@ -21,13 +21,13 @@ args = "App"
 name = "App"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && uvicorn app.main:app --host localhost --port 8000 & cd frontend && npm run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c \"cd backend && uvicorn app.main:app --host localhost --port 8000 & cd frontend && npm run dev\""
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
@@ -37,3 +37,8 @@ externalPort = 80
 localPort = 8000
 externalPort = 8000
 exposeLocalhost = true
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 5000"]
+build = ["bash", "-c", "cd frontend && npm install && npm run build"]
